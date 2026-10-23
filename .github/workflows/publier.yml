@@ -1,0 +1,28 @@
+name: Publier l'APK KAYO
+
+# Chaque nouvelle version de KAYO.apk poussée sur main devient la dernière publication du dépôt.
+# La page client télécharge https://github.com/wilfriedkraidy/kayo-app/releases/latest/download/KAYO.apk
+on:
+  push:
+    branches: [main]
+    paths: ['KAYO.apk', 'VERSION']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Créer la publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(cat VERSION)
+          gh release delete "v$VERSION" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "v$VERSION" KAYO.apk \
+            --title "KAYO $VERSION" \
+            --notes "Caisse et gestion pour ton commerce. Télécharge KAYO.apk sur ton téléphone Android et ouvre-le pour l'installer. Essai gratuit 14 jours. Aide : WhatsApp +225 05 74 56 64 38 — https://kayo-ci.web.app" \
+            --latest
